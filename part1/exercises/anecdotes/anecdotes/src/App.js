@@ -34,7 +34,7 @@ const App = () => {
   };
 
   const findTopAnecdote = votes.indexOf(Math.max(...votes));
-
+  
   return (
     <div>
 
