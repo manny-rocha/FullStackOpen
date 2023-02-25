@@ -1,119 +1,125 @@
-import { useState, useEffect } from 'react'
-import Entry from './components/Entry'
-import Filter from './components/Filter'
-import PersonForm from './components/PersonForm'
-import Notification from './components/Notification' 
-import personService from './services/entries' 
-import { v4 as uuidv4 } from 'uuid';
+import React, { useState, useEffect } from 'react'
+import Filter from './components/Filter.js'
+import Notification from './components/Notification.js'
+import PersonForm from './components/PersonForm.js'
+import PersonList from './components/PersonList.js'
+import personService from './services/persons.js'
 
-function App(props) { 
+const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
-  const [newNumber, setNumber] = useState('')
-  const [search, setSearch] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [nameFilter, setNameFilter] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     personService
       .getAll()
-      .then(initialEntries => {
-        setPersons(initialEntries)
+      .then(data => setPersons(data))
+      .catch(error => {
+        setErrorMessage(error.response.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
       })
   }, [])
 
-  const setEntry = (event) => {
+  const onAdd = (event) => {
     event.preventDefault()
-    const personObject = {
-        name: newName,
-        number: newNumber,
-        id: uuidv4()
-      }
-
-    if (persons.some((persons) => persons.name === newName)) {
-      alert(`${ newName } is already added to phonebook`)
-      setNewName('');
-      setNumber('');
-    } else {
-      personService
-        .create(personObject)
-        .then(returnedPerson => {
-          setPersons(persons.concat(returnedPerson));
-          setNewName('');
-          setNumber('');
+    const newPerson = {name: newName, number: newNumber}
+    const existingPerson = persons.find(person => person.name === newName)
+    if (existingPerson) {
+      if (window.confirm(`${existingPerson.name} is already added to the phonebook, replace the old number with a new one?`)) {
+        personService
+        .update(newPerson, existingPerson.id).then(updatedPerson => {
+          setPersons(persons.map(person => person.id !== existingPerson.id ? person : updatedPerson))
+          setNotificationMessage(
+            `Updated ${newName}`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
         })
+        .catch(error => {
+          setErrorMessage(
+            `Information of ${newName} has already been removed from the server`
+          )
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+          setPersons(persons.filter(person => person.id !== existingPerson.id))
+        })
+      }
     }
+    else {
+      personService.create(newPerson).then(newPersonWithId => {
+        setPersons(persons.concat(newPersonWithId))
+        setNotificationMessage(
+          `Added ${newName}`
+        )
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+      }).catch(error => {
+        setErrorMessage(error.response.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+    }
+    setNewName('')
+    setNewNumber('')
   }
 
-  const handleNameChange = (event) => {
-    console.log(event.target.value);
+  const onChangeName = (event) => {
     setNewName(event.target.value)
   }
-
-  const handleNumberChange = (event) => {
-    console.log(event.target.value);
-    setNumber(event.target.value)
+  const onChangeNameFilter = (event) => {
+    setNameFilter(event.target.value)
+  }
+  const onChangeNumber = (event) => {
+    setNewNumber(event.target.value)
   }
 
-  const handleSearch = (event) => {
-    console.log(event.target.value);
-    setSearch(event.target.value)
-  }
-
-  const personsToShow = search
-    ? persons.filter(person => person.name.toLowerCase().includes(search.toLowerCase()))
-    : persons
-
-  const deletePerson = (person) => {
-    if (window.confirm(`Delete ${person.name}?`)) {
+  const onDelete = (personToDelete) => {
+    if (window.confirm(`Delete ${personToDelete.name}?`)) {
       personService
-        .remove(person.id)
-        .then(() => {
-          setPersons(persons.filter((p) => p.id !== person.id));
+        .deletePerson(personToDelete.id)
+        .then(
+          setPersons(persons.filter(person => person.id !== personToDelete.id))
+        )
+        .catch(error => {
+          setErrorMessage(error.response.data.error)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
         })
-        .catch((error) => {
-          setErrorMessage(          
-            `${ newName } was already removed from server`        
-            )        
-            setTimeout(() => {          
-              setErrorMessage(null)        
-            }, 5000)
-        });
     }
-  };
+  }
 
   return (
     <div>
-
-      <h2>Phonebook</h2>
-
-      <Notification message={errorMessage} />
-
-      <Filter search={search} handleSearch={handleSearch} />
-
-      <h3>Add a new person</h3>
-
-      <PersonForm 
-        setEntry={setEntry} 
-        handleNameChange={handleNameChange} 
-        handleNumberChange={handleNumberChange}
+      <h1>Phonebook</h1>
+      <Notification type='error' message={errorMessage} />
+      <Notification type='success' message={notificationMessage} />
+      <Filter onChange={onChangeNameFilter} />
+      <h2>Add New</h2>
+      <PersonForm
+        newName={newName}
+        newNumber={newNumber}
+        onChangeName={onChangeName}
+        onChangeNumber={onChangeNumber}
+        onAdd={onAdd}
       />
-
-      <h3>Numbers</h3>
-
-      <ul>
-        {personsToShow.map((person, index) => (
-
-          <Entry 
-            key={index} 
-            personObject={person}
-            deletePerson={deletePerson}
-          />
-          
-        ))}
-      </ul>
-
+      <h2>Numbers</h2>
+      <PersonList
+        persons={persons}
+        nameFilter={nameFilter}
+        onDelete={onDelete}
+      />
     </div>
-  );
+  )
 }
 
 export default App

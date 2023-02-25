@@ -1,13 +1,11 @@
-const Filter = ({ search, handleSearch }) => {
-    return (
-      <div>
-        Search Phonebook: 
-        <input 
-          value={search.name}
-          onChange={handleSearch}
-        />
-      </div>
-    )
-  }
+import React from 'react'
 
-export default Filter; 
+const Filter = ({ onChange }) => (
+  <form>
+    <div>
+      Filter name with: <input onChange={onChange} />
+    </div>
+  </form>
+)
+
+export default Filter
