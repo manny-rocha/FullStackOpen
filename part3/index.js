@@ -4,7 +4,7 @@ const app = express();
 
 const Note = require('./models/note')
 
-app.use(express.static("build"));
+
 app.use(express.json());
 
 
@@ -15,13 +15,9 @@ const requestLogger = (request, response, next) => {
   console.log("---");
   next();
 };
+
+app.use(express.static("build"));
 app.use(requestLogger);
-
-let notes = [];
-
-app.get("/", (request, response) => {
-  response.send("<h1>Hello World!</h1>");
-});
 
 app.get('/api/notes', (request, response) => {
     Note.findOne({}).then(notes => {
