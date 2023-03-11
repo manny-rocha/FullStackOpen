@@ -43,7 +43,7 @@ describe('likes', () => {
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
       likes: 2,
-    }  
+    }
   ]
 
   test('equals the sum of likes from all blog posts', () => {

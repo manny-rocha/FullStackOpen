@@ -17,7 +17,7 @@ const mostLikes = (blogs) => {
 
   let maxLikes = 0
   let mostLikes = null
-  
+
   blogs.forEach(blog => {
     if (blog.likes > maxLikes) {
       maxLikes = blog.likes

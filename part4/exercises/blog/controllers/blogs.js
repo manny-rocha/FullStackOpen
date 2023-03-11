@@ -2,15 +2,18 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 // const User = require('../models/user')
 
+
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { name: 1, username: 1, _id: 1 })
   response.json(blogs.map(blog => blog.toJSON()))
 })
 
+
 blogsRouter.get('/:id', async (request, response) => {
   const blog = await Blog.findById(request.params.id)
   response.json(blog.toJSON())
 })
+
 
 blogsRouter.post('/', async (request, response) => {
   if (!request.token || !request.decodedToken) {
@@ -33,6 +36,7 @@ blogsRouter.post('/', async (request, response) => {
   }
 })
 
+
 blogsRouter.delete('/:id', async (request, response) => {
   if (!request.token || !request.decodedToken) {
     return response.status(401).json({ error: 'token missing or invalid' })
@@ -49,6 +53,7 @@ blogsRouter.delete('/:id', async (request, response) => {
     response.status(400).end()
   }
 })
+
 
 blogsRouter.put('/:id', async (request, response) => {
   const blog = {
