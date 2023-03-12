@@ -9,16 +9,25 @@ const Note = require('../models/note')
 
 beforeEach(async () => {
   await Note.deleteMany({})
-  console.log('cleared')
-  
-  const noteObjects = helper.initialNotes
-    .map(note => new Note(note))
-  const promiseArray = noteObjects.map(note => note.save())
-  await Promise.all(promiseArray)
+
+  for (let note of helper.initialNotes) {
+    let noteObject = new Note(note)
+    await noteObject.save()
+  }
 })
 
 
-// Tests for: GET /notes/
+
+// Tests for GET /api/notes/
+
+// test('all notes are returned', async () => {
+//   const response = await api.get('/api/notes')
+
+//   expect(response.body).toHaveLength(helper.initialNotes.length)
+// })
+
+// test('a specific note is within the returned notes', async () => {
+//   const response = await api.get('/api/notes')
 
 test('notes are returned as JSON', async () => {
   console.log('entered test')
@@ -26,7 +35,7 @@ test('notes are returned as JSON', async () => {
     .get('/api/notes')
     .expect(200)
     .expect('Content-Type', /application\/json/)
-}, 100000)
+}, 10000)
 
 test('all notes are returned', async () => {
   const response = await api.get('/api/notes')
@@ -55,7 +64,7 @@ test('a specific note can be viewed', async () => {
     .get(`/api/notes/${noteToView.id}`)
     .expect(200)
     .expect('Content-Type', /application\/json/)
-  
+
   expect(resultNote.body).toEqual(noteToView)
 })
 
@@ -93,11 +102,11 @@ test('note without content is not added', async () => {
     .post('/api/notes')
     .send(newNote)
     .expect(400)
-  
+
   const notesAtEnd = await helper.notesInDb()
 
   expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
-}, 100000)
+}, 1000)
 
 
 // Tests for: DELETE /api/notes/:id
@@ -106,8 +115,8 @@ test('a note can be deleted', async () => {
   const notesAtStart = await helper.notesInDb()
   const noteToDelete = notesAtStart[0]
 
-  await api    
-    .delete(`/api/notes/${noteToDelete.id}`)    
+  await api
+    .delete(`/api/notes/${noteToDelete.id}`)
     .expect(204)
   const notesAtEnd = await helper.notesInDb()
 
