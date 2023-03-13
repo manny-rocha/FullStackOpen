@@ -1,17 +1,20 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+require('dotenv').config()
+// const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
-// const jwt = require('jsonwebtoken')
+mongoose.set('strictQuery', false)
+const jwt = require('jsonwebtoken')
 
 const { info, error } = require('./utils/logger')
 const { MONGODB_URI } = require('./utils/config')
 
 const blogsRouter = require('./controllers/blogs')
-// const userRouter = require('./controller/users')
-// const loginRouter = require('./controller/login')
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 
-// const User = require('./models/user')
+const User = require('./models/user')
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {
@@ -24,10 +27,49 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 
 app.use(cors())
 app.use(express.json())
-// app.use(middleware)
 
-app.use('/api/blogs', blogsRouter)
-// app.use('/api/users', usersRouter)
-// app.use('/api/login', loginRouter)
+
+const tokenExtractor = (request, response, next) => {
+  if (!request.headers['authorization']) return next()
+
+  const authorization = request.get('Authorization')
+  const token = authorization.substring(7)
+  request.token = token
+
+  next()
+}
+
+const userExtractor = async (request, response, next) => {
+  const token = request.token
+  if (!token) return next()
+
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'Invalid token' })
+  }
+
+  const tokenUserId = decodedToken.id
+
+  const user = await User.findById(tokenUserId)
+
+  request.user = user
+
+  // console.log(user);
+
+  next()
+}
+
+app.use(tokenExtractor)
+app.use(userExtractor)
+
+app.use('/api/login', loginRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/blogs', userExtractor, blogsRouter)
+
+if (process.env.NODE_ENV === 'test') {
+  const testingRouter = require('./controller/testing')
+  app.use('/api/testing', testingRouter)
+}
 
 module.exports = app
