@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken')
 const { info, error } = require('./utils/logger')
 const { MONGODB_URI } = require('./utils/config')
 
-const blogsRouter = require('./controllers/blogs')
+const blogsRouter = require('./controllers/blogs.mjs')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 
