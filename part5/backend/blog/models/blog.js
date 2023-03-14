@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 
 const blogSchema = new mongoose.Schema({
   'title': { 'type': String, 'required': true },
@@ -22,4 +22,4 @@ blogSchema.set('toJSON', {
 
 const Blog = mongoose.model('Blog', blogSchema)
 
-export { Blog }
+module.exports = Blog

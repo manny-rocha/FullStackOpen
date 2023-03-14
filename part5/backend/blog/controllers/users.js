@@ -1,8 +1,7 @@
-import bcrypt from 'bcrypt'
-import express from 'express'
-import jwt from 'jsonwebtoken'
-
-import { User } from '../models/user.js'
+const bcrypt = require('bcrypt')
+const express = require('express')
+const jwt = require('jsonwebtoken')
+const User = require('../models/user.js')
 
 const usersRouter = express.Router()
 
@@ -28,13 +27,21 @@ usersRouter.post('/', async (request, response) => {
   const passwordHash = await bcrypt.hash(body.password, saltRounds)
 
   const user = new User({
-    "username": body.username,
-    "name": body.name,
+    'username': body.username,
+    'name': body.name,
     passwordHash,
   })
 
   const savedUser = await user.save()
+
+  const userForToken = await User.findOne({ username: body.username })
+  const payload = {
+    username: userForToken.username,
+    id: userForToken._id,
+  }
+
   response.json(savedUser)
 })
 
-export { usersRouter }
+
+module.exports = usersRouter

@@ -7,10 +7,11 @@ const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 const jwt = require('jsonwebtoken')
 
-const { info, error } = require('./utils/logger')
-const { MONGODB_URI } = require('./utils/config')
+const info = require('./utils/logger').info
+const error = require('./utils/logger').error
+const MONGODB_URI = require('./utils/config').MONGODB_URI
 
-const blogsRouter = require('./controllers/blogs.mjs')
+const blogsRouter = require('./controllers/blogs.js')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
 
