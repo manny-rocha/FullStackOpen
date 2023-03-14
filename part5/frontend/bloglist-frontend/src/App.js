@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
@@ -15,7 +15,7 @@ const App = () => {
   const [successMessage, setSuccessMessage] = useState(null)
   const [user, setUser] = useState(null)
 
-  const blogFormRef = React.createRef()
+  const blogFormRef = useRef()
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -110,11 +110,11 @@ const App = () => {
 
   const deleteBlog = async (BlogToDelete) => {
     try {
-      if (window.confirm(`Delete ${BlogToDelete.title} ?`)) {
+      if (window.confirm(`Delete '${BlogToDelete.title}' ?`)) {
         blogService
           .remove(BlogToDelete.id)
         setSuccessMessage(
-          `Blog ${BlogToDelete.title} was successfully deleted`
+          `Successfully deleted blog: '${BlogToDelete.title}'`
         )
         setAllBlogs(allBlogs.filter(blog => blog.id !== BlogToDelete.id))
         setErrorMessage(null)
@@ -133,6 +133,7 @@ const App = () => {
     }
   }
 
+
   const byLikes = (b1, b2) => b2.likes - b1.likes
 
   return (
@@ -148,7 +149,7 @@ const App = () => {
           password={password}
         /> :
         <div>
-          <p>{user.name} logged in<button onClick={handleLogout} type="submit">logout</button></p>
+          <p>{user.name} Logged In<button onClick={handleLogout} type="submit">Logout</button></p>
           <Togglable buttonLabel="Add new blog" ref={blogFormRef}>
             <BlogForm
               createBlog={createBlog}
@@ -160,6 +161,7 @@ const App = () => {
               blog={blog}
               updateBlog={updateBlog}
               deleteBlog={deleteBlog}
+              user={user}
             />
           )}
         </div>

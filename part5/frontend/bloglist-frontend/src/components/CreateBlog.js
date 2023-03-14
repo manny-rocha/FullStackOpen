@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 const CreateBlog = props => {
   const { addBlog } = props
 
-  const [title, setTitle] = useState("")
-  const [author, setAuthor] = useState("")
-  const [url, setUrl] = useState("")
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
   return (
     <div>

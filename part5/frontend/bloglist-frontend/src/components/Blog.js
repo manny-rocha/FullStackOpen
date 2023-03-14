@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 const Blog = (props) => {
   const blog = props.blog
+  const user = props.user
   const [blogObject, setBlogObject] = useState(blog)
   const [visible, setVisible] = useState(false)
   const showWhenVisible = { display: visible ? '' : 'none' }
@@ -35,12 +36,13 @@ const Blog = (props) => {
   return (
     <div style={blogStyle} className='blog'>
       <div>
-        <p>{blog.title} - {blog.author} <button onClick={toggleVisibility}>{buttonLabel}</button></p>
+        <span>{blog.title} - {blog.author} <button id='view-button' onClick={toggleVisibility}>{buttonLabel}</button></span>
       </div>
       <div style={showWhenVisible}>
-        <p>{blog.url}</p>
-        <p>{blogObject.likes} <button id='like-button' onClick={increaseLikes}>like</button></p>
-        <button id='remove' onClick={removeBlog}>remove</button>
+        <span>{blog.url}</span>
+        <span>{blogObject.likes} <button id='like-button' onClick={increaseLikes}>Like</button></span>
+        <span>Added by: {user.name}</span>
+        <button id='remove-button' onClick={removeBlog}>Remove</button>
       </div>
     </div>
   )
@@ -49,7 +51,8 @@ const Blog = (props) => {
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
   updateBlog: PropTypes.func.isRequired,
-  deleteBlog: PropTypes.func.isRequired
+  deleteBlog: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired
 }
 
 export default Blog
